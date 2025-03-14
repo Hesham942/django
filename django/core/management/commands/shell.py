@@ -171,9 +171,9 @@ class Command(BaseCommand):
         if path_imports is None:
             return {}
 
-        auto_imports = defaultdict(list)
+        auto_imports = defaultdict(set)
         import_errors = []
-        imported_names = defaultdict(set)
+
         for path in path_imports:
             try:
                 obj = import_dotted_path(path) if "." in path else import_module(path)
@@ -186,11 +186,10 @@ class Command(BaseCommand):
             else:
                 module = None
                 name = path
-            if name in imported_names[module]:
-                continue
+            if (name, obj) not in auto_imports[module]:
+                auto_imports[module].add((name, obj))
 
-            imported_names[module].add(name)
-            auto_imports[module].append((name, obj))
+        auto_imports = {k: list(v) for k, v in auto_imports.items()}
 
         namespace = {
             name: obj for items in auto_imports.values() for name, obj in items
