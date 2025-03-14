@@ -171,7 +171,7 @@ class Command(BaseCommand):
         if path_imports is None:
             return {}
 
-        auto_imports = defaultdict(list)
+        auto_imports = defaultdict(set)
         import_errors = []
         for path in path_imports:
             try:
@@ -185,6 +185,9 @@ class Command(BaseCommand):
             else:
                 module = None
                 name = path
+            if (name, obj) not in auto_imports[module]:
+                auto_imports[module].add((name, obj))
+            auto_imports = {k: list(v) for k, v in auto_imports.items()}
 
             auto_imports[module].append((name, obj))
 
