@@ -173,6 +173,7 @@ class Command(BaseCommand):
 
         auto_imports = defaultdict(list)
         import_errors = []
+        imported_names = defaultdict(set)
         for path in path_imports:
             try:
                 obj = import_dotted_path(path) if "." in path else import_module(path)
@@ -185,7 +186,10 @@ class Command(BaseCommand):
             else:
                 module = None
                 name = path
+            if name in imported_names[module]:
+                continue
 
+            imported_names[module].add(name)
             auto_imports[module].append((name, obj))
 
         namespace = {
